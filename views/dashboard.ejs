@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <%- include('partials/_head.ejs') %>
+  <title>Dashboard</title>
+</head>
+<body>
+  <%- include('partials/_header.ejs') %>
+  <div class="container">
+    <h1 class="mt-4 mb-4">Dashboard</h1>
+    <p>API Key: <%= user.apiKey %></p>
+    <div id="creditsUsed">
+      <p>Credits Used: </p>
+      <p>Last Day: <span id="creditsUsedLastDay"><%= creditsUsed.lastDay %></span></p>
+      <p>Last Week: <span id="creditsUsedLastWeek"><%= creditsUsed.lastWeek %></span></p>
+      <p>Last Month: <span id="creditsUsedLastMonth"><%= creditsUsed.lastMonth %></span></p>
+    </div>
+  </div>
+  <%- include('partials/_footer.ejs') %>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

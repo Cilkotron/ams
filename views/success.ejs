@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('partials/_head.ejs') %>
+    <title>Success</title>
+</head>
+<body>
+    <%- include('partials/_header.ejs') %>
+    <div class="container mt-5">
+        <h1>Success!</h1>
+        <p>You have successfully purchased credits.</p>
+        <% if (user && user.credits) { %>
+            <p>Your new credit balance is: <%= user.credits %> credits.</p>
+        <% } %>
+    </div>
+    <%- include('partials/_footer.ejs') %>
+    <script src="/js/main.js"></script>
+</body>
+</html>

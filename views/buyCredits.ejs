@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('partials/_head.ejs') %>
+<body>
+  <%- include('partials/_header.ejs') %>
+  <div class="container my-4">
+    <h2>Buy Credits</h2>
+    <form id="purchase-credits-form">
+      <div class="mb-3">
+        <label for="credits" class="form-label">Credits to Purchase</label>
+        <select class="form-select" id="credits" name="credits" required>
+          <option value="5000">5,000 Credits</option>
+          <option value="25000">25,000 Credits</option>
+          <option value="50000">50,000 Credits</option>
+          <option value="100000">100,000 Credits</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Purchase</button>
+    </form>
+  </div>
+  <%- include('partials/_footer.ejs') %>
+  <script src="/js/buyCredits.js"></script>
+</body>
+</html>

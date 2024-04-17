@@ -1,0 +1,129 @@
+/* Placeholder for custom styles */
+.navbar-brand {
+    margin-left: 20px; /* Adjust the value as needed */
+}
+
+.navbar-nav .nav-link {
+    font-size: 0.9rem; /* Adjust this value to make the font smaller */
+    font-weight: bold; /* Makes the font bold */
+}
+
+/* Overall layout adjustments */
+body, html {
+  height: 100%;
+  margin: 0;
+}
+
+/* Header styles */
+.navbar-custom {
+  background-color: #004d99; /* Dark blue shade */
+}
+
+/* Customizes the color of navbar links */
+.navbar-dark .navbar-nav .nav-link {
+  color: #ffffff;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+  color: #cccccc;
+}
+
+/* Sidebar styles (for smaller screens, if a sidebar is used) */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 56px; /* Height of navbar */
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    padding: 20px;
+    overflow-x: hidden;
+    overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+    background-color: #f5f5f5;
+    border-right: 1px solid #eee;
+  }
+}
+
+/* Adjustments to sidebar visibility on small screens */
+.sidebar .nav-link {
+  color: #333;
+}
+
+.sidebar .nav-link:hover {
+  color: #007bff;
+}
+
+/* Adjusts the main content area when sidebar is present */
+@media (min-width: 768px) {
+  .main-content {
+    margin-left: 240px; /* Same as sidebar width */
+  }
+}
+
+/* Utility classes for padding and margin */
+.p-5 {
+  padding: 3rem !important;
+}
+
+.mt-3 {
+  margin-top: 1rem !important;
+}
+
+/* Additional styles for consistent look and feel */
+/* Enhances the responsiveness and layout of the application using Bootstrap's grid system */
+.container-fluid {
+  padding-right: 0;
+  padding-left: 0;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: -15px;
+  margin-left: -15px;
+}
+
+/* Styles for the header to display the logged-in user's username and a logout button */
+.navbar .navbar-collapse {
+  justify-content: space-between;
+}
+
+.navbar .dropdown-menu {
+  right: 0;
+  left: auto;
+}
+
+/* Ensures the navigation sidebar is responsive and includes links to all main sections of the app */
+@media (min-width: 992px) {
+  .sidebar {
+    position: fixed;
+    top: 56px; /* Adjust based on actual navbar height */
+    left: 0;
+    width: 240px;
+    height: calc(100% - 56px);
+    padding: 20px;
+    background-color: #f8f9fa;
+  }
+
+  .main-content {
+    margin-left: 240px;
+  }
+}
+
+/* Improves the visual hierarchy and readability of content */
+h1, h2, h3, h4, h5, h6 {
+  color: #333;
+}
+
+/* Custom button styles for better visual appeal */
+.btn-custom {
+  background-color: #004d99;
+  color: #fff;
+}
+
+.btn-custom:hover {
+  background-color: #003366;
+  color: #fff;
+}

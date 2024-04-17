@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <%- include('partials/_head.ejs') %>
+    <title>API Information</title>
+</head>
+<body>
+    <%- include('partials/_header.ejs') %>
+    <div class="container mt-5">
+        <h1>API Information</h1>
+        <p>Your API Key: <code><%= user.apiKey %></code></p>
+    </div>
+    <%- include('partials/_footer.ejs') %>
+    <script src="/js/main.js"></script>
+</body>
+</html>
