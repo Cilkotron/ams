@@ -8,12 +8,23 @@
   <%- include('partials/_header.ejs') %>
   <div class="container">
     <h1 class="mt-4 mb-4">Dashboard</h1>
-    <p>API Key: <%= user.apiKey %></p>
-    <div id="creditsUsed">
-      <p>Credits Used: </p>
-      <p>Last Day: <span id="creditsUsedLastDay"><%= creditsUsed.lastDay %></span></p>
-      <p>Last Week: <span id="creditsUsedLastWeek"><%= creditsUsed.lastWeek %></span></p>
-      <p>Last Month: <span id="creditsUsedLastMonth"><%= creditsUsed.lastMonth %></span></p>
+    <div class="card">
+      <div class="card-body">
+        <p>Credits Used: </p>
+        <p>Last Day: <span id="creditsUsedLastDay"><%= creditsUsed.lastDay %></span></p>
+        <p>Last Week: <span id="creditsUsedLastWeek"><%= creditsUsed.lastWeek %></span></p>
+        <p>Last Month: <span id="creditsUsedLastMonth"><%= creditsUsed.lastMonth %></span></p>
+      </div>
+    </div>
+    <div id="currentCredits">
+      <p class="current-credits">Current Credits: <span id="currentCreditsValue"><strong><%= user.credits %></strong></span></p>
+      <form id="decreaseCreditsForm">
+        <div class="mb-3">
+          <label for="decreaseCreditsInput" class="form-label">Amount to Decrease</label>
+          <input type="number" class="form-control" id="decreaseCreditsInput" value="5000" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Decrease Credits</button>
+      </form>
     </div>
   </div>
   <%- include('partials/_footer.ejs') %>

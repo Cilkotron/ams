@@ -5,12 +5,7 @@
   </button>
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav ms-auto">
-      <% if (!session || !session.userId) { %>
-      <li class="nav-item">
-        <a class="nav-link" href="/">Home</a>
-      </li>
-      <% } %>
-      <% if (session && session.userId) { %>
+      <% if (isAuthenticated) { %>
       <li class="nav-item">
         <a class="nav-link" href="/dashboard">Dashboard</a>
       </li>

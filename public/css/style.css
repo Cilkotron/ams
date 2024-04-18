@@ -127,3 +127,14 @@ h1, h2, h3, h4, h5, h6 {
   background-color: #003366;
   color: #fff;
 }
+
+/* Add margin-right to the last link in the navbar */
+.navbar-nav .nav-item:last-child .nav-link {
+  margin-right: 20px;
+}
+
+/* Custom styles for Dashboard */
+.current-credits {
+  margin-top: 20px;
+  font-weight: bold;
+}

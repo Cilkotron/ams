@@ -9,3 +9,31 @@
 {"level":"info","message":"Password hashed successfully","service":"user-service"}
 {"level":"info","message":"Password hashed successfully","service":"user-service"}
 {"level":"info","message":"Password hashed successfully","service":"user-service"}
+{"level":"info","message":"Password hashed successfully for user: %s","service":"user-service"}
+{"level":"info","message":"Password hashed successfully for user: %s","service":"user-service"}
+{"level":"info","message":"Password hashed successfully for user: %s","service":"user-service"}
+{"level":"info","message":"Password hashed successfully for user: %s","service":"user-service"}
+{"level":"info","message":"Password hashed successfully for user: %s","service":"user-service"}
+{"level":"info","message":"Password hashed successfully for user: %s","service":"user-service"}
+{"level":"info","message":"Password hashed successfully for user: %s","service":"user-service"}
+{"level":"info","message":"Password hashed successfully for user: %s","service":"user-service"}
+{"level":"info","message":"Password hashed successfully for user: %s","service":"user-service"}
+{"level":"info","message":"Password hashed successfully for user: %s","service":"user-service"}
+{"level":"info","message":"Password hashed successfully for user: %s","service":"user-service"}
+{"level":"info","message":"Password hashed successfully for user: %s","service":"user-service"}
+{"level":"info","message":"Password hash: $2a$10$BDKSMWrp.MDlddozHkC1Neba1DdnJz.5cALAY9qryJ0bR9ZRa5FH6","service":"user-service"}
+{"level":"info","message":"Password hashed successfully for user: %s","service":"user-service"}
+{"level":"info","message":"Password hash: $2a$10$uY2hF9.yPHizKft33yUG7OIer27VvxNwZIOBxiMGQk5KcRL1U.EuO","service":"user-service"}
+{"level":"info","message":"Password hashed successfully for user: %s","service":"user-service"}
+{"level":"info","message":"Password hash: $2a$10$Rw5jLKeg51BuKh.tzuM16ujAKh/0VD8FTBJxR4O29c1m3jip9sNW6","service":"user-service"}
+{"level":"info","message":"Password hashed successfully for user: %s","service":"user-service"}
+{"level":"info","message":"Password hash is: $2a$10$nOAsvE7.OdQctKsVMbAi0OR87R3IUPMA59PM9ZoFjcLh3sWSQV2aq","service":"user-service"}
+{"level":"info","message":"Password hashed successfully for user: %s","service":"user-service"}
+{"level":"info","message":"Password hash is: $2a$10$BmwvliYRvs6unYYvp7JS8.myHnktl5B2Ooc/XJeJaRMjkH.Nr6wQW","service":"user-service"}
+{"level":"info","message":"Password hashed successfully for user: %s","service":"user-service"}
+{"level":"info","message":"Saving Stripe charge for user 66202c10fe23580f6fabaeec with amount 36","service":"stripe-charge-service"}
+{"level":"error","message":"Error saving Stripe charge for user 66202c10fe23580f6fabaeec: ValidationError: StripeCharge validation failed: stripeChargeId: Path `stripeChargeId` is required.\n    at Document.invalidate (/Users/sanjabudic/Desktop/Pilot/gpt-pilot/workspace/account_management_app/node_modules/mongoose/lib/document.js:3285:32)\n    at /Users/sanjabudic/Desktop/Pilot/gpt-pilot/workspace/account_management_app/node_modules/mongoose/lib/document.js:3046:17\n    at /Users/sanjabudic/Desktop/Pilot/gpt-pilot/workspace/account_management_app/node_modules/mongoose/lib/schemaType.js:1388:9\n    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)","service":"stripe-charge-service"}
+{"level":"error","message":"Error saving Stripe charge for user 66202c10fe23580f6fabaeec: ValidationError: StripeCharge validation failed: stripeChargeId: Path `stripeChargeId` is required.\n    at Document.invalidate (/Users/sanjabudic/Desktop/Pilot/gpt-pilot/workspace/account_management_app/node_modules/mongoose/lib/document.js:3285:32)\n    at /Users/sanjabudic/Desktop/Pilot/gpt-pilot/workspace/account_management_app/node_modules/mongoose/lib/document.js:3046:17\n    at /Users/sanjabudic/Desktop/Pilot/gpt-pilot/workspace/account_management_app/node_modules/mongoose/lib/schemaType.js:1388:9\n    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)","service":"stripe-charge-service"}
+{"level":"info","message":"Saving Stripe charge for user 66202c10fe23580f6fabaeec with amount 0","service":"stripe-charge-service"}
+{"level":"info","message":"Saving Stripe charge for user 66202c10fe23580f6fabaeec with amount 81","service":"stripe-charge-service"}
+{"level":"info","message":"Saving Stripe charge for user 66202c10fe23580f6fabaeec with amount 0","service":"stripe-charge-service"}

@@ -3,6 +3,7 @@ const router = express.Router();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const isAuthenticated = require('../middleware/authMiddleware');
 const User = require('../models/User');
+const StripeCharge = require('../models/StripeCharge'); // Import StripeCharge model
 const { calculateCost } = require('../utils/stripeHelper');
 const logger = require('../utils/logger');
 
@@ -54,9 +55,20 @@ router.post('/purchase-credits', isAuthenticated, async (req, res) => {
       metadata: { credits: credits } // Store credits in metadata for retrieval after purchase
     });
     logger.info(`Stripe checkout session created: ${session.id}`);
+
+    // Save Stripe charge details to the database
+    const stripeCharge = new StripeCharge({
+      userId: user._id,
+      stripeChargeId: session.id, // Use session.id instead of session.payment_intent
+      amount: cost,
+      timestamp: new Date()
+    });
+    await stripeCharge.save();
+    logger.info(`Stripe charge details saved for user: ${user.username}`);
+
     res.json({ url: session.url });
   } catch (error) {
-    logger.error('Error creating Stripe checkout session:', error.message, error.stack);
+    logger.error('Error creating Stripe checkout session: %s\n%s', error.message, error.stack);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
@@ -82,7 +94,7 @@ router.get('/success', isAuthenticated, async (req, res) => {
     // Directly render the success page with updated user information
     res.render('success', { user: user, appName: process.env.APP_NAME || 'Account Management App' }); // Ensure appName is passed to the success template
   } catch (error) {
-    logger.error('Error retrieving Stripe session in success route:', error.message, error.stack);
+    logger.error('Error retrieving Stripe session in success route: %s\n%s', error.message, error.stack);
     res.status(500).send('Error processing your request');
   }
 });

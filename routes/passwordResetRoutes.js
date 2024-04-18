@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const logger = require('../utils/logger');
 
@@ -27,7 +27,7 @@ router.post('/password-reset', async (req, res) => {
         // This might involve setting a flag in the user's session or database record
         // to force re-authentication on the next request
         // Note: The actual implementation of session or token invalidation will depend on your app's authentication flow
-        res.send('Password has been reset successfully. Please log in again.');
+        res.redirect('/auth/login');
     } catch (error) {
         logger.error('Error resetting password', { error: error.message, stack: error.stack });
         res.status(500).send('Error resetting password');

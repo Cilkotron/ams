@@ -29,18 +29,14 @@ const ensureStripeCustomer = async (user) => {
 
 router.get('/billing', isAuthenticated, async (req, res) => {
   try {
-    if (!req.session || !req.session.userId) {
-      logger.error("Unauthorized access attempt to billing information.");
-      return res.status(401).send('Unauthorized: Please log in to access billing information.');
-    }
-    const user = await User.findById(req.session.userId);
+    const user = await User.findById(req.user._id);
     if (!user) {
-      logger.error(`User not found with ID: ${req.session.userId}`);
+      logger.error(`User not found with ID: ${req.user._id}`);
       return res.status(404).send('User not found');
     }
     const stripeCustomerId = await ensureStripeCustomer(user);
     const transactions = await fetchTransactionsForUser(stripeCustomerId);
-    logger.info(`Fetched transactions for user: ${req.session.userId}. Number of transactions: ${transactions.length}`);
+    logger.info(`Fetched transactions for user: ${user._id}. Number of transactions: ${transactions.length}`);
     const appName = process.env.APP_NAME || 'Account Management App';
     res.render('billing', { transactions: transactions, user: user, appName: appName });
   } catch (error) {
@@ -51,17 +47,19 @@ router.get('/billing', isAuthenticated, async (req, res) => {
 
 router.post('/billing/auto-replenish', isAuthenticated, async (req, res) => {
   const { autoReplenish, autoReplenishCredits, autoReplenishThreshold } = req.body;
+  const autoReplenishBool = autoReplenish === 'on' ? true : false; // Convert autoReplenish to boolean
   try {
-    if (!req.session || !req.session.userId) {
+    const user = await User.findById(req.user._id);
+    if (!user) {
       logger.error("Unauthorized attempt to update auto-replenish settings.");
       return res.status(401).send('Unauthorized: Please log in to update settings.');
     }
-    await User.findByIdAndUpdate(req.session.userId, {
-      autoReplenish,
+    await User.findByIdAndUpdate(req.user._id, {
+      autoReplenish: autoReplenishBool,
       autoReplenishCredits,
       autoReplenishThreshold
     });
-    logger.info(`Auto-replenish settings updated for user: ${req.session.userId}. Auto-replenish: ${autoReplenish}, Credits: ${autoReplenishCredits}, Threshold: ${autoReplenishThreshold}`);
+    logger.info(`Auto-replenish settings updated for user: ${req.user._id}. Auto-replenish: ${autoReplenishBool}, Credits: ${autoReplenishCredits}, Threshold: ${autoReplenishThreshold}`);
     res.redirect('/billing');
   } catch (error) {
     logger.error('Failed to update auto-replenish settings: %s', error.message, { stack: error.stack });
@@ -71,9 +69,9 @@ router.post('/billing/auto-replenish', isAuthenticated, async (req, res) => {
 
 router.get('/billing/invoices', isAuthenticated, async (req, res) => {
   try {
-    const user = await User.findById(req.session.userId);
+    const user = await User.findById(req.user._id);
     if (!user) {
-      logger.error(`User not found with ID: ${req.session.userId}`);
+      logger.error(`User not found with ID: ${req.user._id}`);
       return res.status(404).send('User not found');
     }
     const stripeCustomerId = user.stripeCustomerId;
@@ -82,7 +80,7 @@ router.get('/billing/invoices', isAuthenticated, async (req, res) => {
       return res.status(404).send('Stripe customer ID not found');
     }
     const transactions = await fetchTransactionsForUser(stripeCustomerId);
-    logger.info(`Fetched transactions for user: ${req.session.userId}. Number of transactions: ${transactions.length}`);
+    logger.info(`Fetched transactions for user: ${req.user._id}. Number of transactions: ${transactions.length}`);
     res.json(transactions);
   } catch (error) {
     logger.error('Failed to retrieve invoices: %s', error.message, { stack: error.stack });

@@ -15,8 +15,9 @@ const creditUsageRoutes = require('./routes/creditUsageRoutes'); // Import credi
 const passwordResetRoutes = require('./routes/passwordResetRoutes'); // Import password reset routes
 const cookieParser = require('cookie-parser'); // Added for JWT cookie handling
 const cors = require('cors'); // Added for CORS support
+const jwt = require('jsonwebtoken'); // Import jsonwebtoken for verifying JWT tokens
 
-if (!process.env.DATABASE_URL || !process.env.SESSION_SECRET || !process.env.JWT_SECRET || !process.env.STRIPE_SECRET_KEY || !process.env.APP_NAME || !process.env.STRIPE_SUCCESS_URL || !process.env.STRIPE_CANCEL_URL) { // Check for necessary environment variables
+if (!process.env.DATABASE_URL || !process.env.SESSION_SECRET || !process.env.JWT_SECRET || !process.env.STRIPE_SECRET_KEY || !process.env.APP_NAME || !process.env.STRIPE_SUCCESS_URL || !process.env.STRIPE_CANCEL_URL || !process.env.FRONTEND_DOMAIN || !process.env.MICROSERVICE_SECRET_KEY) { // Check for necessary environment variables
   console.error("Error: config environment variables not set. Please create/edit .env configuration file.");
   process.exit(-1);
 }
@@ -78,6 +79,29 @@ app.on("error", (error) => {
   console.error(error.stack);
 });
 
+// Middleware to check authentication status and make it available to all views
+app.use((req, res, next) => {
+  const token = req.cookies['jwt'];
+  if (token) {
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+      if (err) {
+        console.error(`JWT verification error: ${err.message}`);
+        res.locals.isAuthenticated = false;
+      } else {
+        res.locals.isAuthenticated = true;
+        // Ensure only non-sensitive user information is added to res.locals.user
+        res.locals.user = { id: decoded.id }; // Removed username to align with JWT payload structure
+        req.session.userId = decoded.id; // Store user ID in session for persistent login state
+        console.log(`User ${decoded.id} authenticated successfully.`);
+      }
+      next();
+    });
+  } else {
+    res.locals.isAuthenticated = false;
+    next();
+  }
+});
+
 // Logging session creation and destruction
 app.use((req, res, next) => {
   const sess = req.session;
@@ -115,14 +139,14 @@ app.use(apiInfoRoutes); // Registering the API Info routes
 app.use(creditRoutes); // Registering the credit purchase routes
 
 // Credit Usage Update Routes
-app.use('/api', creditUsageRoutes); // Registering the credit usage update routes
+app.use(creditUsageRoutes); // Corrected to directly use creditUsageRoutes without '/api' prefix
 
 // Password Reset Routes
 app.use('/auth', passwordResetRoutes); // Adjusted to mount password reset routes under '/auth'
 
 // Root path response
 app.get("/", (req, res) => {
-  res.render("index", { appName: process.env.APP_NAME });
+  res.render("index", { appName: process.env.APP_NAME, isAuthenticated: res.locals.isAuthenticated });
 });
 
 // If no routes handled the request, it's a 404
@@ -130,12 +154,12 @@ app.use((req, res, next) => {
   res.status(404).send("Page not found.");
 });
 
-// Error handling
+/* // Error handling
 app.use((err, req, res, next) => {
   console.error(`Unhandled application error: ${err.message}`);
   console.error(err.stack);
   res.status(500).send("There was an error serving your request.");
-});
+}); */
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
