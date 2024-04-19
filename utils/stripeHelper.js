@@ -63,4 +63,59 @@ const fetchInvoices = async (stripeCustomerId) => {
   }
 };
 
-module.exports = { createStripeCustomer, createCharge, calculateCost, fetchInvoices };
+const createCustomInvoice = async (userId, amountInUSD) => {
+  try {
+    const user = await User.findById(userId);
+    if (!user.stripeCustomerId) {
+      logger.error(`Stripe customer ID not found for user ${userId}.`);
+      throw new Error('Stripe customer ID not found for user.');
+    }
+    // Ensure amount is greater than zero before creating an invoice
+    if (amountInUSD <= 0) {
+      logger.error(`Attempted to create an invoice with invalid amount: ${amountInUSD} USD for user ${userId}.`);
+      throw new Error('Invalid amount for invoice creation.');
+    }
+    const amount = amountInUSD * 100; // Convert dollars to cents for Stripe API
+    const invoiceItem = await stripe.invoiceItems.create({
+      customer: user.stripeCustomerId,
+      amount: amount,
+      currency: 'usd',
+      description: 'Custom Invoice Charge',
+    });
+    const invoice = await stripe.invoices.create({
+      customer: user.stripeCustomerId,
+      auto_advance: true, // Automatically finalize and pay the invoice
+      collection_method: "charge_automatically",
+    });
+    logger.info(`Custom invoice created: ${invoice.id} for user ${userId} with amount ${amountInUSD} USD.`);
+    return invoice;
+  } catch (error) {
+    logger.error('Error creating custom invoice:', error.message, error.stack);
+    throw error;
+  }
+};
+
+const refundInvoice = async (invoiceId) => {
+  try {
+    const invoice = await stripe.invoices.retrieve(invoiceId);
+    if (!invoice.paid) {
+      logger.error(`Attempted to refund an unpaid invoice: ${invoiceId}. Only paid invoices can be refunded.`);
+      throw new Error('Attempted to refund an unpaid invoice. Only paid invoices can be refunded.');
+    }
+    const charge = invoice.charge;
+    if (!charge) {
+      logger.error(`No charge associated with the paid invoice ${invoiceId}.`);
+      throw new Error('No charge associated with the paid invoice.');
+    }
+    const refund = await stripe.refunds.create({
+      charge: charge,
+    });
+    logger.info(`Refund created for invoice: ${invoiceId} with refund ID: ${refund.id}`);
+    return refund;
+  } catch (error) {
+    logger.error('Error refunding invoice:', error.message, error.stack);
+    throw error;
+  }
+};
+
+module.exports = { createStripeCustomer, createCharge, calculateCost, fetchInvoices, createCustomInvoice, refundInvoice };

@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const logger = require('../utils/logger'); // Ensure logger is imported for detailed logging
+const { verifyAndRefreshToken } = require('../utils/jwtTokenHandler');
 
 const isAuthenticated = async (req, res, next) => {
   try {
@@ -18,7 +19,7 @@ const isAuthenticated = async (req, res, next) => {
       res.locals.isAuthenticated = false; // Ensure isAuthenticated is available in the EJS context
       next(); // Proceed without error to allow handling of non-protected routes
     } else {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET.trim()); // Trim the JWT_SECRET to remove any leading or trailing spaces
+      const decoded = verifyAndRefreshToken(token, res); // Modified to use verifyAndRefreshToken
       const user = await User.findById(decoded.id);
       if (!user) {
         logger.error('The user belonging to this token no longer exists.');
@@ -26,11 +27,19 @@ const isAuthenticated = async (req, res, next) => {
         res.locals.isAuthenticated = false; // Ensure isAuthenticated is available in the EJS context
         next(); // Proceed without error to allow handling of non-protected routes
       } else {
+        const inactivityPeriod = (Date.now() - user.lastActivity.getTime()) / (1000 * 60 * 60 * 24);
+        if (inactivityPeriod > 365) {
+          logger.info(`User ${user.email} logged out due to inactivity.`);
+          res.clearCookie('jwt');
+          req.isAuthenticated = false;
+          res.locals.isAuthenticated = false;
+          return res.status(401).json({ message: "Logged out due to inactivity." });
+        }
         req.user = user;
         req.isAuthenticated = true; // Indicate that the user is authenticated
         res.locals.isAuthenticated = true; // Ensure isAuthenticated is available in the EJS context
         req.session.userId = user._id; // Store user ID in session for persistent login state
-        logger.info(`User ${user.username} authenticated successfully.`);
+        logger.info(`User ${user.email} authenticated successfully.`);
         next();
       }
     }

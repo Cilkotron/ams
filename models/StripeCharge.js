@@ -23,11 +23,12 @@ const stripeChargeSchema = new Schema({
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   stripeChargeId: { type: String, required: true },
   amount: { type: Number, required: true },
+  creditsUsed: { type: Number, required: true }, // Added field for tracking credits used
   timestamp: { type: Date, default: Date.now }
 });
 
 stripeChargeSchema.pre('save', function(next) {
-  logger.info(`Saving Stripe charge for user ${this.userId} with amount ${this.amount}`);
+  logger.info(`Saving Stripe charge for user ${this.userId} with amount ${this.amount} and credits used ${this.creditsUsed}`);
   next();
 });
 
@@ -36,7 +37,7 @@ stripeChargeSchema.post('save', function(error, doc, next) {
     logger.error(`Error saving Stripe charge for user ${this.userId}: ${error.stack}`);
     next(error);
   } else {
-    logger.info(`Stripe charge for user ${this.userId} saved successfully`);
+    logger.info(`Stripe charge for user ${this.userId} saved successfully with credits used ${doc.creditsUsed}`);
     next();
   }
 });

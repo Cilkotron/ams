@@ -6,6 +6,18 @@
     <main role="main">
       <div class="container mt-5">
         <h2>Login</h2>
+        <% if (messages && (messages.success || messages.error)) { %>
+          <% if (Array.isArray(messages.success) && messages.success.length > 0) { %>
+            <% messages.success.forEach(function(message) { %>
+              <div class="alert alert-success"><%= message %></div>
+            <% }); %>
+          <% } %>
+          <% if (Array.isArray(messages.error) && messages.error.length > 0) { %>
+            <% messages.error.forEach(function(message) { %>
+              <div class="alert alert-danger"><%= message %></div>
+            <% }); %>
+          <% } %>
+        <% } %>
         <form method="POST" action="/auth/login">
           <div class="mb-3">
             <input type="email" name="email" placeholder="Email" required class="form-control">
@@ -18,7 +30,7 @@
             Don't have an account? <a href="/auth/register">Register</a>
           </div>
           <div class="mt-3">
-            Forgot your password? <a href="/auth/password-reset">Reset Password</a>
+            Forgot your password? <a href="/auth/request-password-reset">Reset Password</a>
           </div>
         </form>
       </div>

@@ -1,20 +1,20 @@
 # Account Management App
 
-An application designed to integrate a comprehensive account management system, facilitating web scraping activities with an added focus on user authentication, credit-based billing, and account management functionalities.
+An application designed to manage user accounts for a web scraping service, incorporating features like authentication, credit-based billing with Stripe, and a dashboard for account and usage tracking.
 
 ## Overview
 
-This project utilizes a MERN stack architecture, leveraging MongoDB, Express.js, React (implied for front-end, though not detailed), and Node.js. The server-side logic is built on Express.js, managing routes for authentication, billing, and user dashboard functionalities. MongoDB is used for data persistence, storing user credentials, billing information, and usage metrics. The application ensures secure authentication with JWT for session management and integrates Stripe for credit-based billing.
+This project leverages Node.js and Express for the backend, MongoDB for data storage, and integrates Stripe for handling credit-based billing. It uses JWT for session management to keep users logged in across sessions. The frontend styling is powered by Bootstrap, ensuring a responsive and intuitive user interface.
 
 ## Features
 
-- **User Authentication**: Secure registration, login, and password reset functionalities. Users remain logged in with JWTs, persisting sessions across server restarts.
-- **Credit-Based Billing**: Integration with Stripe to manage billing based on credit usage, with tiered pricing structures.
-- **Dashboard**: Users can view their API key, and track credit usage over different intervals.
-- **Auto-Replenish Credits**: Users can enable auto-replenishing of credits upon reaching a set threshold.
-- **Support Contact**: A dedicated page for users to reach out for support.
+- **User Authentication**: Secure login, registration, and password reset functionalities.
+- **Credit-Based Billing**: Allows users to purchase credits for web scraping, with Stripe handling the transactions.
+- **Dashboard**: Users can view their API key, credit usage, and manage their account settings.
+- **Auto-Replenish**: Users can opt-in to automatically purchase credits when their balance falls below a certain threshold.
+- **Support Contact**: A dedicated page for users to reach out for support or inquiries.
 
-## Getting Started
+## Getting started
 
 ### Requirements
 

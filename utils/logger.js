@@ -18,7 +18,7 @@ const logger = winston.createLogger({
       format: winston.format.combine(
         winston.format.colorize(),
         winston.format.printf(info => {
-          return `${info.timestamp} ${info.level}: ${info.message}`;
+          return `${info.timestamp} ${info.level}: ${info.message} ${info.stack ? info.stack : ''}`;
         })
       )
     })

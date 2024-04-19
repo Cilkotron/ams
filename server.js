@@ -12,10 +12,17 @@ const contactRoutes = require('./routes/contactRoutes'); // Import contact route
 const apiInfoRoutes = require('./routes/apiInfoRoutes'); // Import API Info routes
 const creditRoutes = require('./routes/creditRoutes'); // Import credit purchase routes
 const creditUsageRoutes = require('./routes/creditUsageRoutes'); // Import credit usage update routes
-const passwordResetRoutes = require('./routes/passwordResetRoutes'); // Import password reset routes
+const adminRoutes = require('./routes/adminRoutes'); // Import admin routes
 const cookieParser = require('cookie-parser'); // Added for JWT cookie handling
 const cors = require('cors'); // Added for CORS support
 const jwt = require('jsonwebtoken'); // Import jsonwebtoken for verifying JWT tokens
+const cron = require('node-cron'); // Import node-cron for scheduling tasks
+const { checkAndTriggerAutoReplenish } = require('./utils/autoReplenishCredits'); // Import the auto-replenish function
+const http = require('http');
+const { Server } = require("socket.io");
+const updateLastActivityMiddleware = require('./middleware/updateLastActivityMiddleware'); // Import the middleware to update last activity
+const { verifyAndRefreshToken } = require('./utils/jwtTokenHandler'); // Import the modified token handler
+const User = require('./models/User'); // Import User model to fetch isAdmin status
 
 if (!process.env.DATABASE_URL || !process.env.SESSION_SECRET || !process.env.JWT_SECRET || !process.env.STRIPE_SECRET_KEY || !process.env.APP_NAME || !process.env.STRIPE_SUCCESS_URL || !process.env.STRIPE_CANCEL_URL || !process.env.FRONTEND_DOMAIN || !process.env.MICROSERVICE_SECRET_KEY) { // Check for necessary environment variables
   console.error("Error: config environment variables not set. Please create/edit .env configuration file.");
@@ -23,6 +30,13 @@ if (!process.env.DATABASE_URL || !process.env.SESSION_SECRET || !process.env.JWT
 }
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: process.env.FRONTEND_DOMAIN,
+    methods: ["GET", "POST"]
+  }
+});
 const port = process.env.PORT || 3000;
 
 // Middleware to parse request bodies
@@ -74,50 +88,35 @@ app.use(
 // Initialize flash middleware
 app.use(flash());
 
-app.on("error", (error) => {
-  console.error(`Server error: ${error.message}`);
-  console.error(error.stack);
-});
-
 // Middleware to check authentication status and make it available to all views
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
   const token = req.cookies['jwt'];
   if (token) {
-    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-      if (err) {
-        console.error(`JWT verification error: ${err.message}`);
-        res.locals.isAuthenticated = false;
-      } else {
-        res.locals.isAuthenticated = true;
-        // Ensure only non-sensitive user information is added to res.locals.user
-        res.locals.user = { id: decoded.id }; // Removed username to align with JWT payload structure
-        req.session.userId = decoded.id; // Store user ID in session for persistent login state
-        console.log(`User ${decoded.id} authenticated successfully.`);
-      }
-      next();
-    });
+    try {
+      const decoded = verifyAndRefreshToken(token, res);
+      const user = await User.findById(decoded.id);
+      res.locals.isAuthenticated = true;
+      res.locals.user = { id: decoded.id, isAdmin: user ? user.isAdmin : false };
+      req.session.userId = decoded.id;
+      console.log(`User ${decoded.id} authenticated successfully.`);
+    } catch (error) {
+      console.error(`JWT verification error: ${error.message}`);
+      console.error(error.stack);
+      res.locals.isAuthenticated = false;
+    }
   } else {
     res.locals.isAuthenticated = false;
-    next();
-  }
-});
-
-// Logging session creation and destruction
-app.use((req, res, next) => {
-  const sess = req.session;
-  // Make session available to all views
-  res.locals.session = sess;
-  res.locals.success = req.flash('success'); // Make flash messages available to all views
-  if (!sess.views) {
-    sess.views = 1;
-    console.log("Session created at: ", new Date().toISOString());
-  } else {
-    sess.views++;
-    console.log(
-      `Session accessed again at: ${new Date().toISOString()}, Views: ${sess.views}, User ID: ${sess.userId || '(unauthenticated)'}`,
-    );
   }
   next();
+});
+
+// Apply the updateLastActivityMiddleware globally to all authenticated requests
+app.use((req, res, next) => {
+  if (res.locals.isAuthenticated) {
+    updateLastActivityMiddleware(req, res, next);
+  } else {
+    next();
+  }
 });
 
 // Authentication Routes
@@ -141,12 +140,12 @@ app.use(creditRoutes); // Registering the credit purchase routes
 // Credit Usage Update Routes
 app.use(creditUsageRoutes); // Corrected to directly use creditUsageRoutes without '/api' prefix
 
-// Password Reset Routes
-app.use('/auth', passwordResetRoutes); // Adjusted to mount password reset routes under '/auth'
+// Admin Routes
+app.use('/admin', adminRoutes); // Registering the admin routes
 
 // Root path response
 app.get("/", (req, res) => {
-  res.render("index", { appName: process.env.APP_NAME, isAuthenticated: res.locals.isAuthenticated });
+  res.render("index", { appName: process.env.APP_NAME, isAuthenticated: res.locals.isAuthenticated, isAdmin: res.locals.user ? res.locals.user.isAdmin : false });
 });
 
 // If no routes handled the request, it's a 404
@@ -154,13 +153,22 @@ app.use((req, res, next) => {
   res.status(404).send("Page not found.");
 });
 
-/* // Error handling
-app.use((err, req, res, next) => {
-  console.error(`Unhandled application error: ${err.message}`);
-  console.error(err.stack);
-  res.status(500).send("There was an error serving your request.");
-}); */
+// Schedule the auto-replenish function to run every 10 seconds
+cron.schedule('*/10 * * * * *', () => {
+  checkAndTriggerAutoReplenish(io).catch(error => {
+    console.error('Error in scheduled auto-replenish task:', error.message);
+    console.error(error.stack);
+  });
+});
 
-app.listen(port, () => {
+// WebSocket setup for real-time updates
+io.on('connection', (socket) => {
+  console.log('A user connected');
+  socket.on('disconnect', () => {
+    console.log('User disconnected');
+  });
+});
+
+server.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });

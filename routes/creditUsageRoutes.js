@@ -4,6 +4,9 @@ const logger = require('../utils/logger');
 const User = require('../models/User'); // Ensure User model is imported for database operations
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY); // Import Stripe to handle charges
 const isAuthenticated = require('../middleware/authMiddleware');
+const StripeCharge = require('../models/StripeCharge'); // Import StripeCharge model for credit usage tracking
+const { sendCreditUpdate } = require('../utils/socketHandler'); // Import the function to send credit updates via WebSocket
+const { sendEmail } = require('../utils/emailSender'); // Import the email sender utility
 
 // Middleware to authenticate the request from the web scraping microservice
 const authenticateMicroserviceRequest = (req, res, next) => {
@@ -39,7 +42,20 @@ router.post('/update-credits', authenticateMicroserviceRequest, async (req, res)
 
         user.credits -= creditsToUse;
         await user.save();
+
+        // Log the credit update and send a WebSocket message to the user
         logger.info(`Credits updated for user ${userId}. Credits used: ${creditsToUse}`);
+        try {
+            sendCreditUpdate(userId, user.credits);
+        } catch (error) {
+            logger.error('Error sending WebSocket message for credit update', { error: error.message, stack: error.stack });
+        }
+
+        if (user.credits < 1000) {
+            sendEmail(user.email, 'Low Credits Warning', `You have less than 1000 credits. Your current balance is ${user.credits}.`)
+                .catch(error => logger.error('Failed to send low credits warning email', { error: error.message, stack: error.stack }));
+        }
+
         res.json({ message: 'Credits updated successfully', newCredits: user.credits });
     } catch (error) {
         logger.error('Error updating user credits', { error: error.message, stack: error.stack });
@@ -80,28 +96,24 @@ router.post('/decrease-credits', isAuthenticated, async (req, res) => {
 
         user.credits -= decreaseAmount;
         await user.save();
-        logger.info(`Decreased ${decreaseAmount} credits for user ${userId}. New balance: ${user.credits}`);
 
-        // Check for auto-replenish settings and trigger Stripe charge if necessary
-        if (user.autoReplenish && user.credits < user.autoReplenishThreshold) {
-            const chargeAmount = user.autoReplenishCredits; // Amount to replenish
-            try {
-                const charge = await stripe.charges.create({
-                    amount: chargeAmount * 100, // Stripe requires amount in cents
-                    currency: 'usd',
-                    customer: user.stripeCustomerId,
-                    description: `Auto-replenish for ${chargeAmount} credits`,
-                });
-                user.credits += chargeAmount;
-                await user.save();
-                logger.info(`Auto-replenished ${chargeAmount} credits for user ${userId}. New balance: ${user.credits}`);
-            } catch (stripeError) {
-                logger.error('Stripe charge for auto-replenish failed', { error: stripeError.message, stack: stripeError.stack });
-                return res.status(500).json({ message: 'Stripe charge for auto-replenish failed', error: stripeError.message });
-            }
+        // Log the credit decrease and send a WebSocket message to the user
+        logger.info(`Decreased ${decreaseAmount} credits for user ${userId}. New balance: ${user.credits}`);
+        try {
+            sendCreditUpdate(userId, user.credits);
+        } catch (error) {
+            logger.error('Error sending WebSocket message for credit decrease', { error: error.message, stack: error.stack });
         }
 
-        res.json({ message: 'Credits decreased successfully', newCredits: user.credits });
+        sendEmail(req.user.email, 'Credits Decreased', `Your account has been decreased by ${amount} credits. Current balance: ${user.credits}.`)
+            .catch(error => logger.error('Failed to send credits decreased email', { error: error.message, stack: error.stack }));
+
+        if (user.credits < 1000) {
+            sendEmail(req.user.email, 'Low Credits Warning', `Your current balance is now ${user.credits}. Please consider purchasing more credits.`)
+                .catch(error => logger.error('Failed to send low credits warning email', { error: error.message, stack: error.stack }));
+        }
+
+        res.json({ success: true, message: 'Credits decreased successfully', newCredits: user.credits });
     } catch (error) {
         logger.error('Error decreasing credits', { error: error.message, stack: error.stack });
         res.status(500).json({ message: 'Error decreasing credits', error: error.message });

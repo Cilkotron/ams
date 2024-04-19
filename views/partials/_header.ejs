@@ -4,38 +4,42 @@
     <span class="navbar-toggler-icon"></span>
   </button>
   <div class="collapse navbar-collapse" id="navbarNav">
-    <ul class="navbar-nav ms-auto">
+    <ul class="navbar-nav ml-auto">
       <% if (isAuthenticated) { %>
-      <li class="nav-item">
-        <a class="nav-link" href="/dashboard">Dashboard</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/api-info">API Info</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/billing">Billing</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/buy-credits">Buy Credits</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/contact">Contact</a>
-      </li>
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="position: relative;">
-          <i class="fas fa-user-circle"></i>
-        </a>
-        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown" style="position: absolute; top: 50px; right: 0;">
-          <li><a class="dropdown-item" href="/auth/logout">Logout</a></li>
-        </ul>
-      </li>
+        <% if (user.isAdmin) { %>
+          <li class="nav-item">
+            <a class="nav-link" href="/admin/dashboard">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/auth/logout">Logout</a>
+          </li>
+        <% } else { %>
+          <li class="nav-item">
+            <a class="nav-link" href="/dashboard">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/api-info">API Info</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/billing">Billing</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/buy-credits">Buy Credits</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/contact">Contact</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/auth/logout">Logout</a>
+          </li>
+        <% } %>
       <% } else { %>
-      <li class="nav-item">
-        <a class="nav-link" href="/auth/login">Login</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/auth/register">Register</a>
-      </li>
+        <li class="nav-item mr-0">
+          <a class="nav-link" href="/auth/login">Login</a>
+        </li>
+        <li class="nav-item mr-0">
+          <a class="nav-link" href="/auth/register">Register</a>
+        </li>
       <% } %>
     </ul>
   </div>
